@@ -30,8 +30,6 @@ aedes.subscribe('sensor', (packet, cb) => {
 
 const microHttps = fn => http.createServer((req, res) => run(req, res, fn));
 
-let root = ''
-
 const server = microHttps(async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     let obj = {
@@ -43,7 +41,7 @@ const server = microHttps(async (req, res) => {
 });
 
 const Mam = require('@iota/mam')
-const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
+const { asciiToTrytes } = require('@iota/converter')
 
 const mode = 'restricted'
 const secretKey = 'VERYSECRETKEY'
