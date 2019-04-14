@@ -2,7 +2,7 @@
   "name": "dashboard",
   "version": "0.1.0",
   "license": "MIT",
-  "description": "Dashboard repository for team pFTW on the Odyseey Hackathon 2019",
+  "description": "Dashboard repository for team pFTW on the Odyssey Hackathon 2019",
   "author": "Pan <panfree23@gmail.com>",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",

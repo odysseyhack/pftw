@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <h1>Worm Box Dashboard</h1>
+    <h1> Universal Basic Nutrition Dashboard</h1>
     <Panel />
     <el-row>
       <el-col :span="24">

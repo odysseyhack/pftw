@@ -45,9 +45,9 @@
     <el-row>
       <el-col :span="24">
         <el-card>
-          <h2>Last Data</h2>
+          <h2>Latest Data</h2>
           <el-table :data="sortedData" style="width: 100%">
-            <el-table-column  prop="timestamp" label="timestamp" :formatter="timestampFormatter"></el-table-column>
+            <el-table-column prop="timestamp" label="timestamp" :formatter="timestampFormatter"></el-table-column>
             <el-table-column prop="temperature" label="temperature"></el-table-column>
             <el-table-column prop="humidity" label="humidity"></el-table-column>s
           </el-table>
@@ -81,7 +81,7 @@ export default {
   data() {
     return {
       loading: false,
-      timer: '',
+      timer: "",
       data: [],
       actual_temp: 0,
       actual_hum: 0,
@@ -94,13 +94,21 @@ export default {
     },
     fetchData: async function() {
       this.loading = true;
-      this.data = []
+      let temp_data = []
       let logData = data => this.data.push(JSON.parse(trytesToAscii(data)));
+
       let root =
         "YP9AUXGPZSFPWQHWUILXVNBMJHHNCTEUMRSDNLQWG9TTNMNIQZNUT9YTNYRNGHFSMACGJFLBPYIVWBOBC";
 
       // Output asyncronously using "logData" callback function
       await Mam.fetch(root, mode, secretKey, logData);
+
+      if(temp_data.length == this.data.length) {
+        // data is eqal
+        this.loading = false;
+        return
+      }
+
       this.actual_temp = parseInt(this.sortedData[0].temperature);
       this.actual_hum = parseInt(this.sortedData[0].humidity);
       this.actual_time = moment(this.sortedData[0].timestamp).format(
@@ -129,25 +137,25 @@ export default {
       return this.data.sort(compare);
     },
     calcTempColor: function() {
-      if (this.actual_temp <=15) {
-        return 'blue'
-      } else if(this.actual_temp <=25) {
-        return 'green'
-      } else if(this.actual_temp <=25) {
-        return 'yellow'
+      if (this.actual_temp <= 15) {
+        return "blue";
+      } else if (this.actual_temp <= 25) {
+        return "green";
+      } else if (this.actual_temp <= 25) {
+        return "yellow";
       } else {
-        return 'red'
+        return "red";
       }
     },
     calcHumColor: function() {
-      if (this.actual_temp <=10) {
-        return 'blue'
-      } else if(this.actual_temp <=25) {
-        return 'green'
-      } else if(this.actual_temp <=40) {
-        return 'yellow'
+      if (this.actual_temp <= 10) {
+        return "blue";
+      } else if (this.actual_temp <= 25) {
+        return "green";
+      } else if (this.actual_temp <= 40) {
+        return "yellow";
       } else {
-        return 'red'
+        return "red";
       }
     }
   }
@@ -238,7 +246,7 @@ export default {
   .green {
     color: green;
   }
-   .blue {
+  .blue {
     color: blue;
   }
 }
