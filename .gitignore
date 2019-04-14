@@ -4,3 +4,6 @@
 .clang_complete
 .gcc-flags.json
 .DS_Store
+.vscode
+server/node_modules
+dashboard/node_modules

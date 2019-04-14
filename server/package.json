@@ -1,0 +1,18 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@iota/mam": "^0.7.2",
+    "aedes": "^0.37.0",
+    "cron": "^1.7.0",
+    "micro": "^9.3.3"
+  }
+}
