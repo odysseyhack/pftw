@@ -97,7 +97,7 @@ void getAndSendTemperatureAndHumidityData()
 
   Serial.print("temperature");
   Serial.print(t);
-  if (t > 25.00)
+  if (t >= 25.00)
   {
     digitalWrite(D5, HIGH);
   }
@@ -124,7 +124,7 @@ void getAndSendTemperatureAndHumidityData()
 
   payload.toCharArray(charBuf, payload.length() + 1);
 
-  client.publish("test", charBuf);
+  client.publish("sensor", charBuf);
 }
 
 void reconnect()
