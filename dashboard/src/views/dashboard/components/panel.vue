@@ -1,59 +1,72 @@
 <template>
   <div>
-    <el-row v-loading="loading" :gutter="40" class="panel-group">
-      <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSetLineChartData('temp')">
-          <div v-bind:class="calcTempColor" class="card-panel-icon-wrapper icon-thermometer">
-            <svg-icon icon-class="thermometer" class-name="card-panel-icon"/>
+    <div v-if="root">
+      <el-row v-loading="loading" :gutter="40" class="panel-group">
+        <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
+          <div class="card-panel" @click="handleSetLineChartData('temp')">
+            <div v-bind:class="calcTempColor" class="card-panel-icon-wrapper icon-thermometer">
+              <svg-icon icon-class="thermometer" class-name="card-panel-icon"/>
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">Temperature</div>
+              <count-to
+                :start-val="0"
+                :end-val="actual_temp"
+                :duration="3000"
+                class="card-panel-num"
+              />
+            </div>
           </div>
-          <div class="card-panel-description">
-            <div class="card-panel-text">Temperature</div>
-            <count-to
-              :start-val="0"
-              :end-val="actual_temp"
-              :duration="3000"
-              class="card-panel-num"
-            />
+        </el-col>
+        <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
+          <div class="card-panel" @click="handleSetLineChartData('hum')">
+            <div v-bind:class="calcHumColor" class="card-panel-icon-wrapper icon-humidity">
+              <svg-icon icon-class="humidity" class-name="card-panel-icon"/>
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">Humidity</div>
+              <count-to
+                :start-val="0"
+                :end-val="actual_hum"
+                :duration="3000"
+                class="card-panel-num"
+              />
+            </div>
           </div>
-        </div>
-      </el-col>
-      <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSetLineChartData('hum')">
-          <div v-bind:class="calcHumColor" class="card-panel-icon-wrapper icon-humidity">
-            <svg-icon icon-class="humidity" class-name="card-panel-icon"/>
-          </div>
-          <div class="card-panel-description">
-            <div class="card-panel-text">Humidity</div>
-            <count-to :start-val="0" :end-val="actual_hum" :duration="3000" class="card-panel-num"/>
-          </div>
-        </div>
-      </el-col>
+        </el-col>
 
-      <el-col :xs="12" :sm="6" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSetLineChartData('hum')">
-          <div class="card-panel-icon-wrapper icon-humidity">
-            <svg-icon icon-class="clock" class-name="card-panel-icon"/>
+        <el-col :xs="12" :sm="6" :lg="6" class="card-panel-col">
+          <div class="card-panel" @click="handleSetLineChartData('hum')">
+            <div class="card-panel-icon-wrapper icon-humidity">
+              <svg-icon icon-class="clock" class-name="card-panel-icon"/>
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">Last Time</div>
+              <div class="card-panel-time">{{actual_time}}</div>
+            </div>
           </div>
-          <div class="card-panel-description">
-            <div class="card-panel-text">Last Time</div>
-            <div class="card-panel-time">{{actual_time}}</div>
-          </div>
-        </div>
-      </el-col>
-    </el-row>
+        </el-col>
+      </el-row>
 
-    <el-row>
-      <el-col :span="24">
-        <el-card>
-          <h2>Latest Data</h2>
-          <el-table :data="sortedData" style="width: 100%">
-            <el-table-column prop="timestamp" label="timestamp" :formatter="timestampFormatter"></el-table-column>
-            <el-table-column prop="temperature" label="temperature"></el-table-column>
-            <el-table-column prop="humidity" label="humidity"></el-table-column>s
-          </el-table>
-        </el-card>
-      </el-col>
-    </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-card>
+            <h2>Latest Data</h2>
+            <el-button @click="root = ''; input_root = '' " type="danger">Disconnect</el-button>
+            <el-table :data="sortedData" style="width: 100%">
+              <el-table-column prop="timestamp" label="timestamp" :formatter="timestampFormatter"></el-table-column>
+              <el-table-column prop="temperature" label="temperature"></el-table-column>
+              <el-table-column prop="humidity" label="humidity"></el-table-column>s
+            </el-table>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
+    <div v-if="!root">
+      <el-input placeholder="Please input MAM root" v-model="input_root"></el-input>
+
+      <el-button @click="connectToMAM" type="success">Load data</el-button>
+    </div>
   </div>
 </template>
 
@@ -80,6 +93,8 @@ export default {
   },
   data() {
     return {
+      input_root: "",
+      root: "",
       loading: false,
       timer: "",
       data: [],
@@ -89,41 +104,42 @@ export default {
     };
   },
   methods: {
+    connectToMAM() {
+      this.root = this.input_root;
+      this.fetchData();
+      this.timer = setInterval(this.fetchData, 5000);
+    },
     handleSetLineChartData(type) {
       console.log("Clicke, ", type);
     },
     fetchData: async function() {
       this.loading = true;
-      let temp_data = []
-      let logData = data => this.data.push(JSON.parse(trytesToAscii(data)));
-
-      let root =
-        "YP9AUXGPZSFPWQHWUILXVNBMJHHNCTEUMRSDNLQWG9TTNMNIQZNUT9YTNYRNGHFSMACGJFLBPYIVWBOBC";
 
       // Output asyncronously using "logData" callback function
-      await Mam.fetch(root, mode, secretKey, logData);
-
-      if(temp_data.length == this.data.length) {
-        // data is eqal
+      if (this.data.length == 0) {
+        let fillData = data => this.data.push(JSON.parse(trytesToAscii(data)));
+        await Mam.fetch(this.root, mode, secretKey, fillData);
+      } else {
         this.loading = false;
-        return
-      }
+        let tempData = [];
+        let addData = data => tempData.push(JSON.parse(trytesToAscii(data)));
+        await Mam.fetch(this.root, mode, secretKey, addData);
 
+        if (tempData.length != this.data) {
+          this.data = tempData;
+        }
+      }
       this.actual_temp = parseInt(this.sortedData[0].temperature);
       this.actual_hum = parseInt(this.sortedData[0].humidity);
       this.actual_time = moment(this.sortedData[0].timestamp).format(
         "MMMM Do YYYY, h:mm:ss a"
       );
-      this.loading = false;
     },
     timestampFormatter(row, column) {
       return moment(row.timestamp).format("MMMM Do YYYY, h:mm:ss a");
     }
   },
-  created: function() {
-    this.fetchData();
-    this.timer = setInterval(this.fetchData, 30000);
-  },
+  created: function() {},
   beforeDestroy() {
     clearInterval(this.timer);
   },
@@ -136,23 +152,23 @@ export default {
       }
       return this.data.sort(compare);
     },
-    calcTempColor: function() {
+    calcHumColor: function() {
       if (this.actual_temp <= 15) {
         return "blue";
       } else if (this.actual_temp <= 25) {
         return "green";
-      } else if (this.actual_temp <= 25) {
+      } else if (this.actual_temp <= 40) {
         return "yellow";
       } else {
         return "red";
       }
     },
-    calcHumColor: function() {
-      if (this.actual_temp <= 10) {
+    calcTempColor: function() {
+      if (this.actual_temp <= 18) {
         return "blue";
-      } else if (this.actual_temp <= 25) {
+      } else if (this.actual_temp < 25) {
         return "green";
-      } else if (this.actual_temp <= 40) {
+      } else if (this.actual_temp <= 28) {
         return "yellow";
       } else {
         return "red";
