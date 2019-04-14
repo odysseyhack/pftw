@@ -7,22 +7,21 @@
 #define DHTPIN 16
 #define DHTTYPE DHT11
 
-const char* ssid = "Odyssey Hackaton 2019";
-const char* password =  "";
+const char *ssid = "pftw";
+const char *password = "helloworld";
 
-const char* mqtt_server = "192.168.0.147";
-const int mqtt_port = 8884;
-const char* mqtt_user = "user1";
-const char* mqtt_password = "pass1";
-const char* will_topic = "status/1";
+const char *mqtt_server = "192.168.43.80";
+const int mqtt_port = 1337;
+const char *mqtt_user = "";
+const char *mqtt_password = "";
+const char *will_topic = "status/1";
 const int will_qos = 1;
 const bool will_retain = false;
-const char* will_message = "0";
+const char *will_message = "0";
 
-const char* farm_id = "1";
-const char* temp_stream_id = "1";
-const char* humidity_stream_id = "2";
-
+const char *farm_id = "1";
+const char *temp_stream_id = "1";
+const char *humidity_stream_id = "2";
 
 DHT dht(DHTPIN, DHTTYPE);
 WiFiClient espClient;
@@ -31,7 +30,8 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-void setup_wifi() {
+void setup_wifi()
+{
 
   delay(10);
   // We start by connecting to a WiFi network
@@ -41,7 +41,8 @@ void setup_wifi() {
 
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -54,51 +55,32 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(char *topic, byte *payload, unsigned int length)
+{
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++)
+  {
     Serial.print((char)payload[i]);
   }
   Serial.println();
 
   // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
+  if ((char)payload[0] == '1')
+  {
+    digitalWrite(BUILTIN_LED, LOW); // Turn the LED on (Note that LOW is the voltage level
     // but actually the LED is on; this is because
     // it is active low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
   }
-
-}
-
-void reconnect() {
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Create a random client ID
-    String clientId = "ESP8266Client-";
-    clientId += String(random(0xffff), HEX);
-    // Attempt to connect
-    if (client.connect(clientId.c_str(), mqtt_user, mqtt_password, will_topic, will_qos, will_retain, will_message)) {
-      Serial.println("connected");
-      // // Once connected, publish an announcement...
-      // client.publish("outTopic", "hello world");
-      // // ... and resubscribe
-      // client.subscribe("inTopic");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
+  else
+  {
+    digitalWrite(BUILTIN_LED, HIGH); // Turn the LED off by making the voltage HIGH
   }
 }
 
-void getAndSendTemperatureAndHumidityData() {
+void getAndSendTemperatureAndHumidityData()
+{
   Serial.println("Collecting temperature data.");
 
   // Reading temperature or humidity takes about 250 milliseconds!
@@ -107,48 +89,76 @@ void getAndSendTemperatureAndHumidityData() {
   float t = dht.readTemperature();
 
   // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(t)) {
+  if (isnan(h) || isnan(t))
+  {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
 
-  Serial.print("Humidity: ");
-  Serial.print(h);
-  Serial.print(" %\t");
-  Serial.print("Temperature: ");
+  Serial.print("temperature");
   Serial.print(t);
-  Serial.print(" *C ");
+  if (t > 25.00)
+  {
+    digitalWrite(D5, HIGH);
+  }
+  else
+  {
+    digitalWrite(D5, LOW);
+  }
 
   String temperature = String(t);
   String humidity = String(h);
 
-  // // Just debug messages
-  // Serial.print( "Sending temperature and humidity : [" );
-  // Serial.print( temperature ); Serial.print( "," );
-  // Serial.print( humidity );
-  // Serial.print( "]   -> " );
-  //
   // // Prepare a JSON payload string
-  // String payload = "{";
-  // payload += "\"temperature\":"; payload += temperature; payload += ",";
-  // payload += "\"humidity\":"; payload += humidity;
-  // payload += "}";
-  //
-  // // Send payload
-  // char attributes[100];
-  // payload.toCharArray( attributes, 100 );
+  String payload = "{";
+  payload += "\"temperature\":";
+  payload += temperature;
+  payload += ",";
+  payload += "\"humidity\":";
+  payload += humidity;
+  payload += "}";
+  Serial.print(payload);
+  Serial.print("\n");
 
-  char value[ 10];
-  humidity.toCharArray( value, 10);
-  client.publish( "v1/farm/1/stream/1", value );
-  Serial.println( value );
-  temperature.toCharArray( value, 10);
-  client.publish( "v1/farm/1/stream/2", value );
-  Serial.println( value );
+  char charBuf[payload.length() + 1];
+
+  payload.toCharArray(charBuf, payload.length() + 1);
+
+  client.publish("test", charBuf);
 }
 
-void setup() {
+void reconnect()
+{
+  // Loop until we're reconnected
+  while (!client.connected())
+  {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (client.connect(clientId.c_str()))
+    {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+      client.publish("outTopic", "hello world");
+      // ... and resubscribe
+      client.subscribe("inTopic");
+    }
+    else
+    {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+void setup()
+{
   pinMode(BUILTIN_LED, OUTPUT);
+  pinMode(D5, OUTPUT);
   Serial.begin(115200);
 
   setup_wifi();
@@ -158,21 +168,20 @@ void setup() {
   dht.begin();
 }
 
-void loop() {
-  if (!client.connected()) {
+void loop()
+{
+  if (!client.connected())
+  {
+    Serial.print("Not connected, need to reconnect!\n");
+
     reconnect();
   }
   client.loop();
 
   long now = millis();
-  if (now - lastMsg > 10000) {
+  if (now - lastMsg > 10000)
+  {
     getAndSendTemperatureAndHumidityData();
     lastMsg = now;
-
-    // ++value;
-    // snprintf (msg, 50, "hello world #%ld", value);
-    // Serial.print("Publish message: ");
-    // Serial.println(msg);
-    // client.publish("v1/farm1/stream/1", msg);
   }
 }
