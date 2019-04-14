@@ -7,7 +7,7 @@
 #define DHTPIN 16
 #define DHTTYPE DHT11
 
-const char *ssid = "pftw";
+const char *ssid = "pftw2";
 const char *password = "helloworld";
 
 const char *mqtt_server = "192.168.43.80";
