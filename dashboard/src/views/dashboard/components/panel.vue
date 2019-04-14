@@ -1,5 +1,6 @@
 <template>
   <div>
+    <svg-icon icon-class="iota" class-name="iota-logo"/>
     <div v-if="root">
       <el-row v-loading="loading" :gutter="40" class="panel-group">
         <el-col :xs="6" :sm="6" :lg="6" class="card-panel-col">
@@ -63,9 +64,14 @@
       </el-row>
     </div>
     <div v-if="!root">
-      <el-input placeholder="Please input MAM root" v-model="input_root"></el-input>
-
-      <el-button @click="connectToMAM" type="success">Load data</el-button>
+      <el-form :inline="true">
+        <el-form-item label="MAM root:">
+          <el-input placeholder="Please input MAM root" v-model="input_root"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="connectToMAM" type="success">Load data</el-button>
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
@@ -265,5 +271,9 @@ export default {
   .blue {
     color: blue;
   }
+}
+.iota-logo {
+  width: 150px;
+  height: 150px;
 }
 </style>
