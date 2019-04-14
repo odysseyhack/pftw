@@ -10,7 +10,7 @@
 const char *ssid = "pftw2";
 const char *password = "helloworld";
 
-const char *mqtt_server = "192.168.43.80";
+const char *mqtt_server = "raspberrypi.local";
 const int mqtt_port = 1337;
 const char *mqtt_user = "";
 const char *mqtt_password = "";
@@ -95,8 +95,6 @@ void getAndSendTemperatureAndHumidityData()
     return;
   }
 
-  Serial.print("temperature");
-  Serial.print(t);
   if (t >= 25.00)
   {
     digitalWrite(D5, HIGH);
